@@ -1,31 +1,21 @@
 FROM php:8.2-apache-bullseye
 
 RUN apt-get update; \
-	apt-get install -y --no-install-recommends \
-		libfreetype6-dev \
-		libpq-dev \
-		libzip-dev \
-	; \
-  docker-php-ext-install -j "$(nproc)" \
-		opcache \
-		pdo_mysql \
-		pdo_pgsql \
-		zip \
-	; \
-	rm -rf /var/lib/apt/lists/*
+ apt-get install -y libyaml-dev git zip sqlite3
 
-  RUN { \
-		echo 'opcache.memory_consumption=128'; \
-		echo 'opcache.interned_strings_buffer=8'; \
-		echo 'opcache.max_accelerated_files=4000'; \
-		echo 'opcache.revalidate_freq=60'; \
-	} > /usr/local/etc/php/conf.d/opcache-recommended.ini
+RUN pecl install yaml \
+&& pecl install apcu \
+&& docker-php-ext-enable yaml apcu opcache
 
-  COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-  RUN chmod +x /usr/bin/composer
-  WORKDIR /opt/app
-  RUN set -eux; \
-	chown -R www-data:www-data /opt/app; \
-	rmdir /var/www/html; \
-	ln -sf /opt/app/web /var/www/html; 
-	# delete composer cache
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+&& php composer-setup.php --install-dir=/usr/local/bin --filename=composer\
+&& php -r "unlink('composer-setup.php');"
+
+RUN mkdir /app \
+&& rm -r /var/www/html \
+&& ln -s /app/public /var/www/html
+
+ENV PATH="/app/bin:/app/vendor/bin${PATH}"
+WORKDIR /app
+
+RUN sed -i 's#DocumentRoot /var/www/html#DocumentRoot /app/public \n <Directory /app/public>\n        AllowOverride None\n        Require all granted\n        FallbackResource /index.php\n   </Directory>#' /etc/apache2/sites-available/000-default.conf
