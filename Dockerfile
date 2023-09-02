@@ -4,8 +4,8 @@ RUN apt-get update; \
  apt-get install -y libyaml-dev git zip sqlite3 libmagickwand-dev
 
 RUN pecl install yaml \
-&& pecl install apcu imagick\
-&& docker-php-ext-enable yaml apcu opcache imagick
+&& pecl install imagick\
+&& docker-php-ext-enable yaml opcache imagick
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 && php composer-setup.php --install-dir=/usr/local/bin --filename=composer\
