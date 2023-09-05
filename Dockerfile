@@ -29,8 +29,8 @@ RUN sed -i 's#DocumentRoot /var/www/html#DocumentRoot /app/public \n <Directory 
 
 ARG imagick
 
-RUN if [[ -n $imagick ]]; then \
-    apt-get install -y libmagickwand-dev \
-    && pecl install imagick\
-    && docker-php-ext-enable imagick \
-;fi
+RUN if [ -n "$imagick" ]; then \
+    apt-get install -y libmagickwand-dev; \
+     pecl install imagick; \
+     docker-php-ext-enable imagick; \
+fi
