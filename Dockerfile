@@ -2,7 +2,7 @@
 # Purpose: Dockerfile for PHP with Apache for use with Symfony
 # Date: 2023-09-05
 # Image basename: ghcr.io/erroneousbosch/symfony-base
-FROM php:8.3-apache-bookworm
+FROM php:8.3-apache
 
 
 RUN apt-get update; \
