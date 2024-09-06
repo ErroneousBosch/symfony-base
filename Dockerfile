@@ -20,7 +20,8 @@ RUN cd /tmp \
 && git clone https://github.com/Imagick/imagick.git \
 && pecl install /tmp/imagick/package.xml \
 && docker-php-ext-enable imagick \
-&& apt-get remove -y libmagickwand-dev 
+&& apt-get remove -y libmagickwand-dev \
+&& rm -rf /tmp/imagick
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 && php composer-setup.php --install-dir=/usr/local/bin --filename=composer\
