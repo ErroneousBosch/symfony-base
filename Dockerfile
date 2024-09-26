@@ -52,4 +52,18 @@ RUN if ( ${XDEBUG} = true ); then  \
   echo "xdebug.max_nesting_level=256" > /usr/local/etc/php/conf.d/xdebug.ini; \
 fi
 
+ARG DEPLOY=false
+
+RUN if ( ${DEPLOY} = true); then \
+  mv /usr/local/bin/docker-php-entrypoint /usr/local/bin/docker-php-entrypoint-old; \
+  echo '#!/bin/sh' > /usr/local/bin/docker-php-entrypoint \
+  && echo 'console importmap:install' >> /usr/local/bin/docker-php-entrypoint \
+  && echo 'console sass:build' >> /usr/local/bin/docker-php-entrypoint \
+  && echo 'console asset-map:compile' >> /usr/local/bin/docker-php-entrypoint \
+  && echo 'console assets:install' >> /usr/local/bin/docker-php-entrypoint \
+  && echo 'console cache:clear' >> /usr/local/bin/docker-php-entrypoint \
+  && echo 'console cache:warmup' >> /usr/local/bin/docker-php-entrypoint \
+  && echo 'docker-php-entrypoint-old "$@"' >> /usr/local/bin/docker-php-entrypoint \
+  && chmod +x /usr/local/bin/docker-php-entrypoint; \
+fi
 USER www-data
