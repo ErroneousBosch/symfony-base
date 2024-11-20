@@ -4,7 +4,6 @@
 # Image basename: ghcr.io/erroneousbosch/symfony-base
 FROM php:8.3-apache
 
-
 RUN apt-get update; \
  apt-get install -y git zip sqlite3 libmagickwand-dev imagemagick
 
@@ -15,13 +14,8 @@ RUN install-php-extensions yaml opcache intl
 
 # Unfortunately, the imagick installer archive on PECL is broken for PHP 8.3.
 # https://github.com/Imagick/imagick/issues/640
-# Install directly from the git repo
-RUN cd /tmp \
-&& git clone https://github.com/Imagick/imagick.git \
-&& pecl install /tmp/imagick/package.xml \
-&& docker-php-ext-enable imagick \
-&& apt-get remove -y libmagickwand-dev \
-&& rm -rf /tmp/imagick
+# Install from specific version
+RUN install-php-extensions imagick/imagick@28f27044e435a2b203e32675e942eb8de620ee58
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 && php composer-setup.php --install-dir=/usr/local/bin --filename=composer\
@@ -29,7 +23,7 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 
 RUN  apt-get autoremove -y \
 && apt-get clean \
-&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share
+&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN mkdir /app \
 && rm -r /var/www/html \
